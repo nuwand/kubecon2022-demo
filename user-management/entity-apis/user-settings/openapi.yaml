@@ -1,0 +1,153 @@
+openapi: 3.0.0
+servers:
+  - description: Local Server instance
+    url: http://localhost:8080
+info:
+  description: "CRUD Operations for User Settings"
+  version: "1.0.0"
+  title: "User Settings"
+  contact:
+    email: "choreo-help@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: "todo"
+    description: "Sample todo application"
+  - name: "demo"
+    description: "This api is created for demo purposes"
+paths:
+  /usersettings:
+    post:
+      summary: "Create an user settings"
+      operationId: "createUserSettings"
+      description: "Create a user settings with given details"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: "b5fcd44d-6726-4a99-b2f0-c3a7f0fce784"
+                settings:
+                  $ref: "#/components/schemas/AnyValue"
+        description: "a user setting"
+      responses:
+        "201":
+          description: "item created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+        "400":
+          description: "invalid input, object invalid"
+        "500":
+          description: "internal server error occurred"
+  /usersettings/{userId}:
+    get:
+      summary: "Retrieve a user settings by user id"
+      operationId: "getSettingsByUserId"
+      description: |
+        Retrieve a user setting by user id.
+      parameters:
+        - name: userId
+          in: path
+          description: "User Id"
+          required: true
+          schema:
+            type: string
+            example: "b5fcd44d-6726-4a99-b2f0-c3a7f0fce784"
+
+      responses:
+        "200":
+          description: "The user settings for given user id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+
+        "404":
+          description: "Unable to find the user id"
+    put:
+      summary: "Update a user settings by user id"
+      operationId: "updateUserSettingsById"
+      description: |
+        Update a user settings by id.
+      parameters:
+        - name: userId
+          in: path
+          description: "User Id"
+          required: true
+          schema:
+            type: string
+            example: "b5fcd44d-6726-4a99-b2f0-c3a7f0fce784"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                settings:
+                  $ref: "#/components/schemas/AnyValue"
+        description: "an user setting"
+      responses:
+        "200":
+          description: "a user setting"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+        "404":
+          description: "Unable to find the user id"
+    delete:
+      summary: "Delete a user setting"
+      operationId: "deleteUserSeetingById"
+      description: |
+        Delete a user setting by id.
+      parameters:
+        - name: userId
+          in: path
+          description: "user Id"
+          required: true
+          schema:
+            type: string
+            example: "b5fcd44d-6726-4a99-b2f0-c3a7f0fce784"
+      responses:
+        "200":
+          description: "The user settings with Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+        "404":
+          description: "Unable to find user settings for given user id"
+
+components:
+  schemas:
+    UserSettings:
+      type: object
+      required:
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        userId:
+          type: string
+          example: "b5fcd44d-6726-4a99-b2f0-c3a7f0fce784"
+        settings:
+          $ref: "#/components/schemas/AnyValue"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+    AnyValue:
+      nullable: true
+      description: "A valid json payload, including null"
