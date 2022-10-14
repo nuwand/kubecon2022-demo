@@ -3,16 +3,31 @@ import ballerina/graphql;
 // The API is exposed at `http://host:4000/task/query`.
 service /task/query on new graphql:Listener(4000) {
 
-    // This resource can be queried using the `{ groups }`.
-    resource isolated function get groups() returns Group[] {
-        table<Task> key(id) tasksTable = table [];
+    // This resource can be queried using a query that starts as `{ group(id:1) }`.
+    resource isolated function get tasksFilteredByGroup(int id) returns GroupTasks {
+      GroupTasks groupTasks = {
+        tasks: genTaskForGroup(id, 8)
+      };
+      return groupTasks;
+    }
 
+    // This resource can be queried using a query that starts as `{ group(id:1) }`.
+    resource isolated function get tasksFilteredByGroupAndStatus(int id, string status) returns GroupTasks {
+      Task[] tasksArr = genTaskForGroup(id, 8);
+
+      Task[] tasks = from Task task in tasksArr
+                where task.status == status
+                select task;
+      GroupTasks groupTasks = {
+        tasks: tasks
+      };
+      return groupTasks;
+    }
+
+    // This resource can be queried using a query that starts as `{ groups }`.
+    resource isolated function get groups() returns Group[] {
         json rawTasks = getAllTasks();
         Task[] tasksArr = <Task[]>rawTasks;
-
-        foreach Task task in tasksArr {
-            tasksTable.add(task);
-        }
 
         json rawGroups = getAllGroups();
         GroupEntity[] groups = <GroupEntity[]>rawGroups;
@@ -38,6 +53,10 @@ service /task/query on new graphql:Listener(4000) {
 public type Group record {|
     int id;
     string name;
+    Task[] tasks;
+|};
+
+public type GroupTasks record {|
     Task[] tasks;
 |};
 
