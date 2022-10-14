@@ -1,14 +1,19 @@
 import express from 'express'
 import prisma from './dbClient'
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
-import { Prisma } from '@prisma/client';
+import { Prisma, TaskGroup } from '@prisma/client';
 
 const taskGroupRoute = express.Router();
+
+const defaultTaskGroups: string[] = ["Urgent and important",
+  "Urgent, not important",
+  "Important, not urgent",
+  "Not urgent and not important"];
 
 taskGroupRoute.get(`/`, async (req, res) => {
   const { userId } = req.query;
 
-  const tasks = await prisma.taskGroup.findMany({
+  var taskGroups = await prisma.taskGroup.findMany({
     where: {
       userId: {
         equals: userId as string
@@ -19,9 +24,38 @@ taskGroupRoute.get(`/`, async (req, res) => {
     }
   })
 
-  res.status(StatusCodes.OK).json(tasks);
+  if (Array.isArray(taskGroups) && taskGroups.length == 0) {
+    // no task groups available yet.
+    taskGroups = await seedDefaultTaskGroups(userId as string);
+  }
+
+
+  res.status(StatusCodes.OK).json(taskGroups);
 })
 
+async function seedDefaultTaskGroups(userId: string): Promise<TaskGroup[]> {
+  const taskGroups: TaskGroup[] = [];
+
+  for (var index in defaultTaskGroups) {
+    try {
+      const taskGroup = await prisma.taskGroup.create({
+        data: {
+          title: defaultTaskGroups[index],
+          userId: userId
+        }
+      });
+      taskGroups.push(taskGroup);
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(e.message);
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  return taskGroups;
+}
 
 taskGroupRoute.get(`/:id`, async (req, res) => {
   const { id } = req.params;
