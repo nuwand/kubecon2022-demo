@@ -1,0 +1,9 @@
+# Adding this file allows using the given package name when importing modules
+[package]
+org = "kubecon2022demo"
+name = "task_query"
+version = "0.1.0"
+distribution = "2201.2.1"
+
+[build-options]
+observabilityIncluded = true

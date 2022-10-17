@@ -43,7 +43,7 @@ paths:
         name: taskId
         in: path
         required: true
-    put:
+    patch:
       summary: Update task
       operationId: post-tasks-taskId
       responses:
@@ -68,7 +68,7 @@ paths:
       operationId: delete-tasks-taskId
       responses:
         '200':
-          description: OK
+          $ref: '#/components/responses/Task'
       parameters: []
   '/tasks/{taskId}/change-group':
     parameters:
@@ -188,6 +188,12 @@ paths:
               x-examples:
                 Example 1:
                   name: Urgent and Not Important
+    delete:
+      summary: Delete group
+      operationId: delete-groups-groupId
+      responses:
+        '200':
+          $ref: '#/components/responses/Group'
   /archive/tasks:
     post:
       summary: Archive tasks

@@ -1,48 +1,41 @@
 import ballerina/graphql;
+import task_query.entity; // Use package name as given in Ballerina.toml
 
-// The API is exposed at `http://host:4000/task/query`.
-service /task/query on new graphql:Listener(4000) {
+configurable string groupApiUrl = ?;
+configurable string taskApiUrl = ?;
+configurable string accessToken = ?;
+
+final entity:GroupClient groupClient = check new ({auth: {token: accessToken}}, groupApiUrl);
+final entity:TaskClient taskClient = check new ({auth: {token: accessToken}}, taskApiUrl);
+
+// A GraphQL API to query tasks and groups.
+service / on new graphql:Listener(4000) {
 
     // This resource can be queried using a query that starts as `{ group(id:1) }`.
-    resource isolated function get tasksFilteredByGroup(int id) returns GroupTasks {
-      GroupTasks groupTasks = {
-        tasks: genTaskForGroup(id, 8)
-      };
-      return groupTasks;
+    resource isolated function get tasks(int groupId) returns Task[]|error {
+        entity:Task[] tasksByGroupId = check taskClient->getTasksByTaskGroupId(groupId.toString());
+        return convertRawToSendingTaskArray(tasksByGroupId);
     }
 
-    // This resource can be queried using a query that starts as `{ group(id:1) }`.
-    resource isolated function get tasksFilteredByGroupAndStatus(int id, string status) returns GroupTasks {
-      Task[] tasksArr = genTaskForGroup(id, 8);
+    // This resource can be queried using a query that starts as `{ group(id:1, status:open) }`.
+    resource isolated function get tasksFiltered(int groupId, string status) returns Task[]|error {
+        entity:Task[] tasksArr = check taskClient->getTasksByTaskGroupId(groupId.toString());
 
-      Task[] tasks = from Task task in tasksArr
-                where task.status == status
-                select task;
-      GroupTasks groupTasks = {
-        tasks: tasks
-      };
-      return groupTasks;
+        Task[] tasks = from entity:Task task in tasksArr
+            where task.taskStatus == status
+            select convertRawToSendingTask(task);
+        return tasks;
     }
 
-    // This resource can be queried using a query that starts as `{ groups }`.
-    resource isolated function get groups() returns Group[] {
-        json rawTasks = getAllTasks();
-        Task[] tasksArr = <Task[]>rawTasks;
-
-        json rawGroups = getAllGroups();
-        GroupEntity[] groups = <GroupEntity[]>rawGroups;
+    // This resource can be queried using a query that starts as `{ groups { tasks } }`.
+    resource isolated function get groups() returns Group[]|error {
+        string extractUserResult = extractUser("jwt");
+        entity:GroupReturned[] groupsByUserId = check groupClient->getGroupsByUserId(extractUserResult);
 
         Group[] groupArray = [];
-        foreach GroupEntity group in groups {
-            Task[] tasks = from Task task in tasksArr
-                where task.groupId == group.id
-                select task;
+        foreach entity:GroupReturned group in groupsByUserId {
 
-            Group groupWithTasks = {
-                id: group.id,
-                name: group.name,
-                tasks: tasks
-            };
+            Group groupWithTasks = new (group.id, group.title);
 
             groupArray.push(groupWithTasks);
         }
@@ -50,82 +43,50 @@ service /task/query on new graphql:Listener(4000) {
     }
 }
 
-public type Group record {|
-    int id;
-    string name;
-    Task[] tasks;
-|};
-
-public type GroupTasks record {|
-    Task[] tasks;
-|};
-
-public type Task record {|
-    int groupId;
-    readonly int id;
-    string title;
-    string status;
-    string createdAt;
-    string updatedAt;
-|};
-
-type GroupEntity record {|
-    int id;
-    string name;
-|};
-
-//--------- Methods to call entity APIs
-
-public isolated function getAllGroups() returns json {
-    GroupEntity[] groups = [
-        {
-            id: 1,
-            name: "Urgent and Important"
-        },
-        {
-            id: 2,
-            name: "Urgent, not important"
-        },
-        {
-            id: 3,
-            name: "Important, not urgent"
-        },
-        {
-            id: 4,
-            name: "Not urgent and not important"
-        }
-    ];
-
-    return groups;
+isolated function extractUser(string taskAppUserToken) returns string {
+    return "user@gmail.com";
 }
 
-public isolated function getAllTasks() returns json {
-    Task[] tasks = [];
-    foreach int i in 0 ... 4 {
-        Task[] tasksTemp = genTaskForGroup(i, 8);
-        tasks.push(...tasksTemp);
+service class Group {
+    private final int id;
+    private final string name;
+
+    isolated function init(int id, string name) {
+        self.id = id;
+        self.name = name;
     }
 
-    return tasks;
+    // Each resource function becomes a field of the `Person` type.
+    isolated resource function get id() returns int {
+        return self.id;
+    }
+    isolated resource function get name() returns string {
+        return self.name;
+    }
+    isolated resource function get tasks() returns Task[]|error {
+        entity:Task[] tasksRaw = check taskClient->getTasksByTaskGroupId(self.id.toString());
+        return convertRawToSendingTaskArray(tasksRaw);
+    }
 }
 
-// temp methods to simulate entity API
-isolated function genTaskForGroup(int groupId, int numberOfTasks) returns Task[] {
-    Task[] tasks = [];
-    string[] states = ["open", "in-progress", "complete"];
-    foreach int i in 0 ... numberOfTasks - 1 {
-        int taskId = (groupId * numberOfTasks) + i;
-        string title = "Task " + taskId.toString();
+isolated function convertRawToSendingTaskArray(entity:Task[] tasksRaw) returns Task[] {
+    Task[] tasksToSend = [];
+    foreach entity:Task taskRaw in tasksRaw {
         Task task = {
-            groupId,
-            id: taskId,
-            title: title,
-            status: states[i % 3],
-            createdAt: "t1",
-            updatedAt: "t2"
+            id: taskRaw.id,
+            title: taskRaw.title,
+            status: taskRaw.taskStatus
         };
-        tasks.push(task);
+        tasksToSend.push(task);
     }
-    return tasks;
+    return tasksToSend;
 }
 
+isolated function convertRawToSendingTask(entity:Task taskRaw) returns Task {
+    Task task = {
+        id: taskRaw.id,
+        title: taskRaw.title,
+        status: taskRaw.taskStatus
+    };
+    return task;
+}
