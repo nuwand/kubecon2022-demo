@@ -123,4 +123,24 @@ taskRoute.post(`/:id/group/:taskGroupId`, async (req, res) => {
 
 })
 
-export { taskRoute };   
+export { taskRoute };
+
+taskRoute.delete(`/:id`, async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const task = await prisma.task.delete({
+            where: {
+                id: Number(id),
+            },
+        })
+        res.status(StatusCodes.OK).json(task);
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            console.log(e.message);
+            res.status(StatusCodes.NOT_FOUND).send(getReasonPhrase(StatusCodes.NOT_FOUND));
+        } else {
+            throw e;
+        }
+    }
+})
