@@ -41,7 +41,7 @@ taskStatusRoute.get(`/:id`, async (req, res) => {
   if (taskStatus.length == 0) {
     res.status(StatusCodes.NOT_FOUND).send(getReasonPhrase(StatusCodes.NOT_FOUND));
   } else {
-    res.status(StatusCodes.OK).json(taskStatus);
+    res.status(StatusCodes.OK).json(taskStatus[0]);
   }
 })
 
