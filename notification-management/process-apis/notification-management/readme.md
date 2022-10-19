@@ -9,6 +9,7 @@ Nilesh Jayanandana
 - notificationURL - url of the notification entity service
 - domain - email domain of mailgun
 - apiKey - apiKey of mailgun
+- sendEmail - true/false
 
 ### Choreo BYOC
 

@@ -1,8 +1,8 @@
 type Query {
   # Get all groups including tasks
   groups: [Group!]
-  tasksFilteredByGroup(id: ID!): GroupTasks!
-  tasksFilteredByGroupAndStatus(id: ID!): GroupTasks!
+  tasks(groupId: ID!): [Task!]
+  tasksFiltered(groupId: ID!, status: String): [Task!]
 }
 
 type Group {
@@ -11,15 +11,8 @@ type Group {
     tasks [Task!]
 }
 
-type GroupTasks {
-    tasks [Task!]
-}
-
 type Task {
-  groupId Int!
   id Int!
   title String
   status String
-  createdAt String
-  updatedAt String
 }

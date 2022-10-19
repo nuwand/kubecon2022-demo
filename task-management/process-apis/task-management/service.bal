@@ -1,21 +1,23 @@
 import ballerina/http;
+import ballerina/jwt;
 
 configurable string groupApiUrl = ?;
 configurable string taskApiUrl = ?;
 configurable string accessToken = ?;
 
-final GroupClient groupClient = check new ({ auth: { token: accessToken }}, groupApiUrl);
-final TaskClient taskClient = check new ({ auth: { token: accessToken }}, taskApiUrl);
+final GroupClient groupClient = check new ({auth: {token: accessToken}}, groupApiUrl);
+final TaskClient taskClient = check new ({auth: {token: accessToken}}, taskApiUrl);
 
 service / on new http:Listener(9090) {
 
-    # Create new task
-    # 
+    # Create new task.
+    #
     # + payload - Title and the group of the task to be created
-    # + return  - Created task
+    # + return - Created task
     resource function post tasks(@http:Payload TasksBody payload) returns CreatedTask|error {
         TaskBody taskBody = {
             title: payload.title,
+            taskStatus: "open",
             taskGroupId: payload.groupId
         };
         Task task = check taskClient->createTask(taskBody);
@@ -29,10 +31,10 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Update task
-    # 
+    # Update task.
+    #
     # + payload - Task title to be updated into 
-    # + return  - Updated task
+    # + return - Updated task
     resource function patch tasks/[string taskId](@http:Payload TasksTaskidBody payload) returns TaskModel|error {
         int id = check int:fromString(taskId);
         Task taskById = check taskClient->getTaskById(id);
@@ -51,8 +53,8 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Delete task
-    # 
+    # Delete task.
+    #
     # + return - Deleted task
     resource function delete tasks/[string taskId]() returns TaskModel|error {
         int id = check int:fromString(taskId);
@@ -65,13 +67,12 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Change group
-    # 
+    # Change group.
+    #
     # + payload - Current group id (for validation) and the new group id
     # + return - Content of the task after changing the group
     resource function post tasks/[string taskId]/'change\-group(@http:Payload TaskidChangegroupBody payload)
     returns InlineResponse200|ConflictMessage|error {
-
         int id = check int:fromString(taskId);
         Task taskById = check taskClient->getTaskById(id);
         if (payload.groupId != taskById.taskGroupId) {
@@ -94,12 +95,13 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Change status
-    # 
+    # Change status.
+    #
     # + payload - New status of the task
     # + return - Content of the task after updating the task status
-    resource function post tasks/[string taskId]/'change\-status(@http:Payload TaskidChangestatusBody payload)
-    returns InlineResponse2001|ConflictMessage|error {
+    resource function post tasks/[string taskId]/'change\-status(@http:Payload TaskidChangestatusBody payload
+    ) returns InlineResponse2001|ConflictMessage|error {
+
         int id = check int:fromString(taskId);
         Task taskById = check taskClient->getTaskById(id);
         if (payload.status == taskById.taskStatus) {
@@ -122,14 +124,15 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Create group
-    # 
+    # Create group.
+    #
     # + payload - Title of the group to be created
-    # + return  - Created group
-    resource function post groups(@http:Payload GroupName payload) returns CreatedGroup|error {
+    # + return - Created group
+    resource function post groups(@http:Payload GroupName payload, http:Request request) returns CreatedGroup|error {
+        string userId = check extractUser(request);
         TaskgroupBody taskgroupBody = {
             title: payload.name,
-            userId: extractUser("")
+            userId: userId
         };
         TaskGroup taskGroup = check groupClient->createTaskGroup(taskgroupBody);
         return {
@@ -140,10 +143,10 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Update group
-    # 
+    # Update group.
+    #
     # + payload - Title of the group to be updated
-    # + return  - Updated group
+    # + return - Updated group
     resource function put groups/[string groupId](@http:Payload GroupName payload) returns Group|error {
         int id = check int:fromString(groupId);
         TaskgroupIdBody taskgroupIdBody = {
@@ -156,8 +159,8 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Delete group
-    # 
+    # Delete group.
+    #
     # + return - Deleted task
     resource function delete groups/[string groupId]() returns Group|error {
         int id = check int:fromString(groupId);
@@ -168,24 +171,30 @@ service / on new http:Listener(9090) {
         };
     }
 
-    # Archive task
-    # 
+    # Archive task.
+    #
     # + payload - Task id and group id of the task to be archived
-    # + return  - Ok 200
+    # + return - Ok 200
     resource function post archive/tasks(@http:Payload ArchiveTasksBody payload) returns http:Ok {
         return http:OK;
     }
 
-    # Archive task
-    # 
+    # Archive task.
+    #
     # + payload - Id of the group to be archived
-    # + return  - Ok 200
+    # + return - Ok 200
     resource function post archive/groups(@http:Payload ArchiveGroupsBody payload) returns http:Ok {
         return http:OK;
     }
 }
 
-isolated function extractUser(string taskAppUserToken) returns string {
-    return "user@gmail.com";
+isolated function extractUser(http:Request request) returns string|error {
+    string jwtHeader = check request.getHeader("x-jwt-assertion");
+    [jwt:Header, jwt:Payload] decode = check jwt:decode(jwtHeader);
+    string? userId = decode[1].sub;
+    if userId == () {
+        return error("Unable to read the user ID. Backend JWT did not include the claim sub");
+    }
+    return userId;
 }
 

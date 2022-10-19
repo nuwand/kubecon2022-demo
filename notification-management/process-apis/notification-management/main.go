@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/nuwand/kubecon2022-demo/notification-api/helpers"
 	"github.com/nuwand/kubecon2022-demo/notification-api/services"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"time"
 )
 
 type NotificationRequest struct {
@@ -96,7 +98,9 @@ func NotificationCreate(ctx context.Context, req NotificationRequest) (*services
 		return nil, err
 	}
 
-	if req.SendEmail {
+	sendEmail := os.Getenv("sendEmail")
+
+	if sendEmail == "true" {
 		go services.SendEmail(ctx, req.UserEmail)
 	}
 

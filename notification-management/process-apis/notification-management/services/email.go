@@ -2,15 +2,17 @@ package services
 
 import (
 	"context"
-	"github.com/mailgun/mailgun-go/v4"
+	"fmt"
 	"os"
+
+	"github.com/mailgun/mailgun-go/v4"
 )
 
 func SendEmail(ctx context.Context, email string) (string, error) {
 	mg := mailgun.NewMailgun(os.Getenv("domain"), os.Getenv("apiKey"))
 
 	m := mg.NewMessage(
-		"Choreo Task Manager Demo <postmaster@sandboxd7b034e52844480e83f0356a777d1536.mailgun.org>",
+		fmt.Sprintf("Choreo Task Manager Demo <postmaster@%s>", os.Getenv("domain")),
 		"Task Manager Notification",
 		"",
 		email,

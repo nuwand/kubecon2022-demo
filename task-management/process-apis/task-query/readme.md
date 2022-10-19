@@ -20,7 +20,8 @@ curl -X POST -H "Content-type: application/json" \
         id           
         name                    
     }                
-  }" }'                \
+  }",
+  "operationName":null } }'                \
   'http://localhost:4000/task/query'
 ```
 
@@ -73,7 +74,8 @@ curl -X POST -H "Content-type: application/json" \
             status   
         }            
     }                
-  }" }'                \
+  }",
+  "operationName":null } }'                \
   'http://localhost:4000/task/query'
 ```
 
@@ -154,7 +156,8 @@ curl -X POST -H "Content-type: application/json" \
         title 
         status             
     }                  
-  }" }'                \
+  }",
+  "operationName":null } }'                \
   'http://localhost:4000/task/query'
 ```
 
@@ -185,7 +188,8 @@ curl -X POST -H "Content-type: application/json" \
         title 
         status            
     }                
-  }" }'                \
+  }",
+  "operationName":null } }'                \
   'http://localhost:4000/task/query'
 ```
 
@@ -193,5 +197,3 @@ curl -X POST -H "Content-type: application/json" \
 ```
 {"data":{"tasksFiltered":[...]}}
 ```
-
-

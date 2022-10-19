@@ -1,5 +1,10 @@
 import ballerina/graphql;
+import ballerina/http;
+import ballerina/jwt;
+import ballerina/lang.value;
 import task_query.entity; // Use package name as given in Ballerina.toml
+
+const USER_ID = "userId";
 
 configurable string groupApiUrl = ?;
 configurable string taskApiUrl = ?;
@@ -7,6 +12,24 @@ configurable string accessToken = ?;
 
 final entity:GroupClient groupClient = check new ({auth: {token: accessToken}}, groupApiUrl);
 final entity:TaskClient taskClient = check new ({auth: {token: accessToken}}, taskApiUrl);
+
+@graphql:ServiceConfig {
+    contextInit: isolated function(http:RequestContext requestContext, http:Request request)
+                                    returns graphql:Context|error {
+
+        graphql:Context context = new;
+
+        string backendJwt = check request.getHeader("x-jwt-assertion");
+        [jwt:Header, jwt:Payload] [_, payload] = check jwt:decode(backendJwt);
+        string? userId = payload.sub;
+        if userId == () {
+            return error("Unable to read the user ID. Backend JWT did not include the claim sub");
+        }
+
+        context.set(USER_ID, userId);
+        return context;
+    }
+}
 
 // A GraphQL API to query tasks and groups.
 service / on new graphql:Listener(4000) {
@@ -28,23 +51,25 @@ service / on new graphql:Listener(4000) {
     }
 
     // This resource can be queried using a query that starts as `{ groups { tasks } }`.
-    resource isolated function get groups() returns Group[]|error {
-        string extractUserResult = extractUser("jwt");
+    resource isolated function get groups(graphql:Context context) returns Group[]|error {
+        string extractUserResult = check extractUser(context);
         entity:GroupReturned[] groupsByUserId = check groupClient->getGroupsByUserId(extractUserResult);
 
         Group[] groupArray = [];
         foreach entity:GroupReturned group in groupsByUserId {
-
             Group groupWithTasks = new (group.id, group.title);
-
             groupArray.push(groupWithTasks);
         }
         return groupArray;
     }
 }
 
-isolated function extractUser(string taskAppUserToken) returns string {
-    return "user@gmail.com";
+isolated function extractUser(graphql:Context context) returns string|error {
+    value:Cloneable|isolated object {} userId = check context.get(USER_ID);
+    if userId is string {
+        return userId;
+    }
+    return error("User ID has not been set to the graphql context");
 }
 
 service class Group {
