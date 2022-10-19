@@ -45,3 +45,14 @@ model UserSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
+
+model ArchivedTask {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(500)
+  userId      String   @db.VarChar(100)
+  taskId      Int
+  taskGroupId Int
+  taskStatus  String   @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}

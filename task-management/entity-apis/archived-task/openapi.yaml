@@ -1,0 +1,256 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: http://localhost:8080/archivedtask
+info:
+  description: "CRUD Operations for Archived Tasks"
+  version: "1.0.0"
+  title: "Archived Task API"
+  contact:
+    email: "choreo-help@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: "todo"
+    description: "Sample todo application"
+  - name: "demo"
+    description: "This api is created for demo purposes"
+paths:
+  /archivedtask:
+    get:
+      summary: "returns archived tasks for a given task group"
+      operationId: "getArchivedTasksByTaskGroupId"
+      description: |
+        returns a list of archived tasks given the task group Id. list will be sorted by last updated date.
+      parameters:
+        - in: "query"
+          name: "taskGroupId"
+          description: "Task Group Id"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "list of archived tasks belonging to the given task group"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArchivedTask"
+        "500":
+          description: "internal error occurred"
+    post:
+      summary: "Create a Archived Task"
+      operationId: "createArchivedTask"
+      description: "Create a archived task with given details"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: "ea69ddda-c44f-4ba5-a701-fda8a6c1ff42"
+                taskId:
+                  type: integer
+                  example: 23
+                title:
+                  type: string
+                  example: "Review monthly expenses"
+                taskStatus:
+                  type: string
+                  example: "Open"
+                taskGroupId:
+                  type: integer
+                  example: 5
+        description: "An example in progress task"
+      responses:
+        "201":
+          description: "item created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchivedTask"
+        "400":
+          description: "invalid input, object invalid"
+        "500":
+          description: "internal server error occurred"
+  /archivedtask/{id}:
+    get:
+      summary: "Retrieve a archived task by id"
+      operationId: "getArchivedTaskById"
+      description: |
+        Retrieve a archived task by id.
+      parameters:
+        - name: id
+          in: path
+          description: "Archived Task Id"
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: "The archived task with Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchivedTask"
+
+        "404":
+          description: "Unable to find the archived task"
+    delete:
+      summary: "Delete an archived task by id"
+      operationId: "deleteArchivedTaskById"
+      description: |
+        Delete a archived task by id.
+      parameters:
+        - name: id
+          in: path
+          description: "Archived task Id"
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: "The archived task with Id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchivedTask"
+        "404":
+          description: "Unable to find the archived task"
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - taskGroupId
+        - taskStatus
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 10
+        title:
+          type: string
+          example: "Review monthly expenses"
+        taskGroupId:
+          type: integer
+          minimum: 1
+          example: 5
+        taskStatus:
+          type: string
+          example: "Open"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+    TaskGroup:
+      type: object
+      required:
+        - id
+        - title
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 10
+        title:
+          type: string
+          example: "Urgent and important tasks"
+        userId:
+          type: string
+          example: "ea69ddda-c44f-4ba5-a701-fda8a6c1ff42"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+    TaskStatus:
+      type: object
+      required:
+        - id
+        - name
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 10
+        name:
+          type: string
+          example: "InProgress"
+        userId:
+          type: string
+          example: "ea69ddda-c44f-4ba5-a701-fda8a6c1ff42"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+    ArchivedTask:
+      type: object
+      required:
+        - id
+        - userId
+        - title
+        - taskId
+        - taskGroupId
+        - taskStatus
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 10
+        userId:
+          type: string
+          example: "ea69ddda-c44f-4ba5-a701-fda8a6c1ff42"
+        title:
+          type: string
+          example: "Review monthly expenses"
+        taskId:
+          type: integer
+          minimum: 1
+          example: 10
+        taskGroupId:
+          type: integer
+          minimum: 1
+          example: 5
+        taskStatus:
+          type: string
+          example: "Open"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-12T15:56:12.171Z"
