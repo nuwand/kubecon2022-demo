@@ -1,20 +1,39 @@
 .landing-wrapper {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
 }
 
 .login-card {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
-    border-radius: 1rem;
-    box-shadow: rgb(99 99 99 / 20%) 0px 2px 8px 0px;
-    row-gap: 2rem;
-    width: 50%;
-    height: 50%;
+    border-radius: var(--main-radius);
+    box-shadow: 0px 1px 1px #D2D5DD;
+    width: 27rem;
+    height: 22rem;
     background-color: white;
+}
+.login-card > img {
+    margin-top: 3.6rem;
+}
+
+.login-card h3 {
+    margin: 3.8rem 0 0.18rem ;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #40404b;
+}
+
+.login-tagline {
+    margin: 0 0 1.62rem;
+    font-weight: 400;
+    color: #8d91a3;
 }
 
 .landing-wrapper .card {

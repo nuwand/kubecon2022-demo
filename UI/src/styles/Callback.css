@@ -2,5 +2,54 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    flex-direction: column;
+        width: 100%;
+    }
+    
+    .callback-layout ul {
+        padding-left: 0;
+        list-style: none;
+        flex-direction: column;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .callback-layout ul li:not(:last-child) {
+        margin-bottom: 0.5rem;
+    }
+    
+    .callback-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .callback-item-text {
+        font-weight: 300;
+    }
+    
+    .callback-item-icon {
+        margin-left: 0.4rem;
+        font-size: 1.2rem;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .callback-item-icon img {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .success-icon {
+        color: green;
+        font-size: 1.2rem;
+        width: 100%;
+    
+    }
+    
+    .spinner-icon {
+        font-size: 1.2rem;
+        width: 100%;
 }

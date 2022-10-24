@@ -4,6 +4,29 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 https://simple-todo-using-choreo.vercel.app/
 
+# How to run the app locally
+
+- Run
+```
+npm ci
+```
+from the root folder of the app (where `package.json` resides)
+
+- Then run
+
+```
+npm start
+```
+
+this will build the React Application with development configurations and start the developmet web server locally in port 3000
+
+- To access the app visit
+
+```
+https://localhost:3000/
+```
+
+
 # Service implementation
 
 https://github.com/tmkasun/todo-api

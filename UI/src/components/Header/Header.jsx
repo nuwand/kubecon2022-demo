@@ -1,21 +1,25 @@
-import useUser from '../../data/hooks/user';
 import '../../styles/Header/Header.css';
-import AvatarMenu from '../AvatarMenu';
-import FilterTasks from '../FilterTasks';
-import SearchInput from '../SearchInput';
+import AvatarMenu from './AvatarMenu';
+import logo from '../../images/logo.svg';
 
 export default function Header(props) {
-    const user = useUser();
     return (
-        <div className='header-container'>
-            <div className='header-left'>
-                <SearchInput />
-                <FilterTasks />
+        <div className="header-container">
+            <div className="header-left">
+                <div className="choreo-logo-container">
+                    <img
+                        width={33}
+                        height={24}
+                        className="choreo-logo"
+                        src={logo}
+                        alt="Choreo Logo"
+                    />
+                </div>
+                <h4>Todo Dashboard</h4>
             </div>
-
-            <div className='header-right'>
+            <div className="header-right">
                 <AvatarMenu />
             </div>
-
-        </div>)
+        </div>
+    );
 }

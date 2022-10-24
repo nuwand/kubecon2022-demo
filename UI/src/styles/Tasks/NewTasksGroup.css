@@ -9,22 +9,24 @@
     font-size: 3rem;
     background: white;
     border-radius: 1.5rem;
-    padding: 1rem;
     width: 3rem;
     height: 3rem;
     position: relative;
     cursor: pointer;
+    box-shadow: 0px 1px 1px #D2D5DD;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.new-task-group-container img {
+    width: 1.5rem;
 }
 
 .new-task-group-container span:hover {
     box-shadow: 0 0 9px -4px;
 }
 
-.add-character:before {
-    content: "+";
-    margin-top: -1.6rem;
-    margin-left: -0.3rem;
-    position: absolute;
-
-
+.close-character {
+    margin-right: 0.5rem;
 }

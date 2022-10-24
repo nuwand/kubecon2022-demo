@@ -1,0 +1,30 @@
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: conic-gradient(#5567d540, #5567d5);
+  position: relative;
+  animation: spin 1s linear infinite;
+    transform: translateZ(0);
+  }
+.spinner::after {
+  background: #E6E8F0;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  content: "";
+  margin: auto;
+  position: absolute;
+  top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+to {
+  transform: rotate(360deg);
+}
+}

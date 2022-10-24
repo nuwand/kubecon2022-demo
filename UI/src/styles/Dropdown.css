@@ -1,25 +1,32 @@
 .icons li {
-    background: none repeat scroll 0 0 black;
-    height: 4px;
-    width: 4px;
+    background: none repeat scroll 0 0 #40404b;
+    height: 0.125rem;
+    width: 0.125rem;
     line-height: 0;
     list-style: none outside none;
-    margin-right: 15px;
-    margin-top: 4px;
     vertical-align: top;
     border-radius: 50%;
     pointer-events: none;
 }
 
 .dropbtn {
+    display: flex;
     color: white;
     font-size: 16px;
     border: none;
     cursor: pointer;
+    padding: 1rem;
+    margin: 0;
 }
 
-.dropbtn:hover,
-.dropbtn:focus {}
+.horizontal-btn {
+    column-gap: 0.3rem;
+}
+
+.vertical-btn {
+    flex-direction: column;
+    row-gap: 0.3rem;
+}
 
 .dropdown {
     display: flex;
@@ -32,11 +39,12 @@
     margin-top: 2rem;
     min-width: 160px;
     overflow: auto;
-    box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 20%);
-    z-index: 10;
+    z-index: 1;
     top: 0;
     margin-left: -8rem;
     border-radius: 0.5rem;
+    box-shadow: 0px 5px 50px rgba(203, 206, 219, 0.5);
+    border-radius: 6px;
 }
 
 .dropdown-content a {
@@ -44,6 +52,16 @@
     padding: 12px 16px;
     text-decoration: none;
     display: flex;
+    text-transform: capitalize;
+    color: #40404b;
+    font-weight: 400;
+    font-size: 14px;
+    display: flex;
+    column-gap: 1rem;
+}
+
+.dropdown-content .delete-action {
+    color: #fe523c;
 }
 
 .dropdown-content a:hover {

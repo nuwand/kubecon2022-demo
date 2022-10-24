@@ -1,12 +1,24 @@
 .login-button {
+    height: 40px;
+    font-size: 14px;
+    box-shadow: 0 0 1px 0 rgb(0 0 0 / 12%), 0 1px 1px 0 rgb(0 0 0 / 24%);
+    margin-top: 12px;
+    min-height: 38px;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    padding-left: 8px;
+    border-radius: 2px;
+    padding-right: 8px;
+    letter-spacing: 0.22px;
+    text-transform: none;
+    background-color: #ffffff;
+    border-radius: 5px;
     display: flex;
+    align-content: center;
     align-items: center;
-    column-gap: 0.5rem;
-    font-size: 1.3rem;
-    border-radius: 0.5rem;
-    border: none;
-    background: white;
-    padding: 0.5rem;
-    box-shadow: rgb(102 102 102 / 34%) 0px 2px 6px 0px;
-    cursor: pointer;
+    border: 0;
+    width: 11rem;
+    justify-content: space-around;
+    border: 1px solid #f9f9f9;
 }
