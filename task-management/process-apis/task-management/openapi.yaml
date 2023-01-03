@@ -201,6 +201,19 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  taskId:
+                    type: integer
+                  groupId:
+                    type: integer
+                  archivedAt:
+                    type: string
       parameters: []
       requestBody:
         content:
@@ -212,12 +225,9 @@ paths:
                   groupId: 2
                   taskId: 123
               properties:
-                groupId:
-                  type: integer
                 taskId:
                   type: integer
               required:
-                - groupId
                 - taskId
   /archive/groups:
     post:

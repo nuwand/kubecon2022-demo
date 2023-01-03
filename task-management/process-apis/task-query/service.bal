@@ -8,10 +8,13 @@ const USER_ID = "userId";
 
 configurable string groupApiUrl = ?;
 configurable string taskApiUrl = ?;
+configurable string archiveApiUrl = ?;
 configurable string accessToken = ?;
 
-final entity:GroupClient groupClient = check new ({auth: {token: accessToken}}, groupApiUrl);
-final entity:TaskClient taskClient = check new ({auth: {token: accessToken}}, taskApiUrl);
+// Accessed via internal URLs given in Choreo DevOps Portal.
+final entity:GroupClient groupClient = check new ({}, groupApiUrl);
+final entity:TaskClient taskClient = check new ({}, taskApiUrl);
+final entity:ArchiveClient archiveClient = check new ({}, archiveApiUrl);
 
 @graphql:ServiceConfig {
     contextInit: isolated function(http:RequestContext requestContext, http:Request request)
@@ -61,6 +64,12 @@ service / on new graphql:Listener(4000) {
             groupArray.push(groupWithTasks);
         }
         return groupArray;
+    }
+
+    // This resource can be queried using a query that starts as `{ archived(id:1) }`.
+    resource isolated function get archived(int groupId) returns ArchivedTask[]|error {
+        entity:ArchivedTask[] tasksByGroupId = check archiveClient->getArchivedTasksByTaskGroupId((groupId.toString()));
+        return convertRawToSendingArchivedArray(tasksByGroupId);
     }
 }
 
@@ -114,4 +123,20 @@ isolated function convertRawToSendingTask(entity:Task taskRaw) returns Task {
         status: taskRaw.taskStatus
     };
     return task;
+}
+
+isolated function convertRawToSendingArchivedArray(entity:ArchivedTask[] archivedTasksRaw) returns ArchivedTask[] {
+    ArchivedTask[] archivedTasksToSend = [];
+    foreach entity:Task archivedTaskRaw in archivedTasksRaw {
+        ArchivedTask archivedTask = {
+            id: archivedTaskRaw.id,
+            taskId: archivedTaskRaw.taskId,
+            groupId: archivedTaskRaw.taskGroupId,
+            title: archivedTaskRaw.title,
+            status: archivedTaskRaw.taskStatus,
+            archivedAt: archivedTaskRaw.createdAt
+        };
+        archivedTasksToSend.push(archivedTask);
+    }
+    return archivedTasksToSend;
 }

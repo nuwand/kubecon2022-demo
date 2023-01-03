@@ -1,6 +1,6 @@
 import ballerina/http;
 
-// -- Used by service
+// -------------------------- Used by the Task Management service
 public type GroupName record {
     string name;
 };
@@ -44,6 +44,13 @@ public type InlineResponse200 record {
     int groupId?;
 };
 
+public type InlineResponse2002 record {
+    int id?;
+    int taskId?;
+    int groupId?;
+    string archivedAt?;
+};
+
 public type TaskidChangegroupBody record {
     int groupId;
     int newGroupId;
@@ -63,7 +70,6 @@ public type Message record {
 };
 
 public type ArchiveTasksBody record {
-    int groupId;
     int taskId;
 };
 
@@ -71,7 +77,7 @@ public type ArchiveGroupsBody record {
     int groupId;
 };
 
-//-- Common to both clients
+// -------------------------- Common to all the clients
 public type Task record {
     int id;
     string title;
@@ -97,7 +103,7 @@ public type TaskGroup record {
     string updatedAt;
 };
 
-//-- Task client
+// -------------------------- Used by the Task client
 public type TaskArr Task[];
 
 public type TaskBody record {
@@ -125,7 +131,7 @@ public type TaskgroupIdBody record {
     string title?;
 };
 
-//-- Notification client
+// -------------------------- Used by the Notification client
 
 public type ServicesNotificationcreateresponse record {
     string _id?;
@@ -140,4 +146,27 @@ public type MainNotificationrequest record {
     boolean sendEmail?;
     string 'type?;
     string userEmail;
+};
+
+// -------------------------- Used by the Archive client
+
+public type ArchivedTaskArr ArchivedTask[];
+
+public type ArchivedTask record {
+    int id;
+    string userId;
+    string title;
+    int taskId;
+    int taskGroupId;
+    string taskStatus;
+    string createdAt;
+    string updatedAt;
+};
+
+public type ArchivedtaskBody record {
+    string userId?;
+    int taskId?;
+    string title?;
+    string taskStatus?;
+    int taskGroupId?;
 };

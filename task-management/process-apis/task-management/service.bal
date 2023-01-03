@@ -12,12 +12,14 @@ const string USER_ATTRIBUTE_GIVEN_NAME = "http://wso2.org/claims/givenname";
 
 configurable string groupApiUrl = ?;
 configurable string taskApiUrl = ?;
+configurable string archiveApiUrl = ?;
 configurable string notificationUrl = ?;
 configurable string accessToken = ?;
 
 // Accessed via internal URLs given in Choreo DevOps Portal.
 final GroupClient groupClient = check new ({}, groupApiUrl);
 final TaskClient taskClient = check new ({}, taskApiUrl);
+final ArchiveClient archiveClient = check new ({}, archiveApiUrl);
 
 // Accessed via public URLs using an access token generated from Choreo Developer Portal.
 final NotificationClient notificationClient = check new ({auth: {token: accessToken}}, notificationUrl);
@@ -111,7 +113,7 @@ service / on new http:Listener(9090) {
 
     # Change status.
     #
-    # + payload - New status of the task
+    # + payload - New status of the task. Ex: { "status" : "in-progress" }
     # + return - Content of the task after updating the task status
     resource function post tasks/[string taskId]/'change\-status(@http:Payload TaskidChangestatusBody payload,
     http:Request request) returns InlineResponse2001|ConflictMessage|error {
@@ -176,7 +178,7 @@ service / on new http:Listener(9090) {
 
     # Create group.
     #
-    # + payload - Title of the group to be created
+    # + payload - Title of the group to be created. Ex: { "name" : "Urgent and Important" }
     # + return - Created group
     resource function post groups(@http:Payload GroupName payload, http:Request request) returns CreatedGroup|error {
         string userId = check extractUser(request);
@@ -223,10 +225,49 @@ service / on new http:Listener(9090) {
 
     # Archive task.
     #
-    # + payload - Task id and group id of the task to be archived
-    # + return - Ok 200
-    resource function post archive/tasks(@http:Payload ArchiveTasksBody payload) returns http:Ok {
-        return http:OK;
+    # + payload - Task id of the task to be archived. Ex: { "taskId" : 123 }
+    # + return - Info about the archived task after archiving. 
+    resource function post archive/tasks(@http:Payload ArchiveTasksBody payload, http:Request request) returns InlineResponse2002|error {
+        string userId = check extractUser(request);
+        int taskId = payload.taskId;
+
+        Task taskById = check taskClient->getTaskById(taskId);
+
+        ArchivedtaskBody taskToArchive = {
+          userId,
+          taskId,
+          taskGroupId: taskById.taskGroupId,
+          title: taskById.title,
+          taskStatus: taskById.taskStatus
+        };
+        ArchivedTask archivedTask = check archiveClient->createArchivedTask(taskToArchive);
+
+        do {
+          _ = check taskClient->deleteTaskById(taskId);
+        }
+        on fail {
+          log:printError("An error occured while archiving the task. Unable to delete the archived task from"+
+          " the unarchived collection. Rolling back the archive operation");
+
+          ArchivedTask|error archivedTaskById = archiveClient->deleteArchivedTaskById(archivedTask.id);
+          if archivedTaskById is ArchivedTask {
+            log:printInfo("Successfully rolled back the archive operation");
+            return error("Error while deleting the archived task from the unarchived task collection. "+
+              "The archive operation has been rolled back");
+          } else {
+            log:printError("Error while rolling back the archive operation");
+            return error("An error occured while archiving the task. Although the task has been archived,"+
+            " unable to delete from the unarchived task collection. Please delete the duplicate task that"+
+            " is present in the Unarchived section.");
+          }
+        }
+        InlineResponse2002 archivedTaskResponse = {
+          id: archivedTask.id,
+          taskId: archivedTask.taskId,
+          groupId: archivedTask.taskGroupId,
+          archivedAt: archivedTask.createdAt
+        };
+        return archivedTaskResponse;
     }
 
     # Archive group.

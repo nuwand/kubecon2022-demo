@@ -22,7 +22,7 @@ curl -X POST -H "Content-type: application/json" \
     }                
   }",
   "operationName":null } }'                \
-  'http://localhost:4000/task/query'
+  'http://localhost:4000'
 ```
 
 ### Response
@@ -76,7 +76,7 @@ curl -X POST -H "Content-type: application/json" \
     }                
   }",
   "operationName":null } }'                \
-  'http://localhost:4000/task/query'
+  'http://localhost:4000'
 ```
 
 ### Response
@@ -158,7 +158,7 @@ curl -X POST -H "Content-type: application/json" \
     }                  
   }",
   "operationName":null } }'                \
-  'http://localhost:4000/task/query'
+  'http://localhost:4000'
 ```
 
 ### Response
@@ -190,10 +190,48 @@ curl -X POST -H "Content-type: application/json" \
     }                
   }",
   "operationName":null } }'                \
-  'http://localhost:4000/task/query'
+  'http://localhost:4000'
 ```
 
 ### Response
 ```
 {"data":{"tasksFiltered":[...]}}
+```
+
+## Get archived tasks by group
+
+### GraphQL query
+```
+{   
+    archived(groupId:1) {                      
+        id   
+        taskId 
+        groupId     
+        title 
+        status  
+        archivedAt          
+    }                
+}
+```
+
+### cURL
+```
+curl -X POST -H "Content-type: application/json" \
+  -d '{ "query": "{   
+    archived(groupId:1) {                      
+        id   
+        taskId 
+        groupId     
+        title 
+        status  
+        archivedAt          
+    }                
+  }",
+  "operationName":null } }'                \
+  'http://localhost:4000'
+```
+
+### Response
+```
+{"data":{"archived":[...]}}
 ```

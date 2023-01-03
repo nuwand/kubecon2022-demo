@@ -3,16 +3,26 @@ type Query {
   groups: [Group!]
   tasks(groupId: ID!): [Task!]
   tasksFiltered(groupId: ID!, status: String): [Task!]
+  archived(groupId: ID!): [ArchivedTask!]
 }
 
 type Group {
-    id Int!
-    name String!
-    tasks [Task!]
+  id Int!
+  name String!
+  tasks [Task!]
 }
 
 type Task {
   id Int!
   title String
   status String
+}
+
+type ArchivedTask {
+  id Int!
+  taskId Int
+  groupId Int
+  status String
+  title String
+  archivedAt String
 }

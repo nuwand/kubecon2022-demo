@@ -9,3 +9,12 @@ public type GroupWithTasks record {|
     string name;
     Task[] tasks;
 |};
+
+public type ArchivedTask record {
+    int id;
+    int taskId;
+    int groupId;
+    string title;
+    string status;
+    string archivedAt;
+};
